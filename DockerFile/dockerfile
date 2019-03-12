@@ -1,0 +1,19 @@
+FROM microsoft/windowsservercore
+
+LABEL Description="MySql-Windows-Server" Vendor="Oracle" Version="5.7.25"
+
+RUN powershell -Command \
+	$ErrorActionPreference = 'Stop'; \
+	Invoke-WebRequest -Method Get -Uri https://cdn.mysql.com//Downloads/MySQL-5.7/mysql-5.7.25-winx64.zip -OutFile c:\mysql.zip ; \
+	Expand-Archive -Path c:\mysql.zip -DestinationPath c:\ ; \
+	Remove-Item c:\mysql.zip -Force;
+
+RUN SETX /M Path %path%;C:\mysql-5.7.25-winx64\bin
+
+RUN powershell -Command \
+	Invoke-WebRequest -Method Get -Uri https://raw.githubusercontent.com/scse-l/mysql57-windows-server-core/master/msvcp120.dll -OutFile c:\windows\system32\msvcp120.dll;\
+    Invoke-WebRequest -Method Get -Uri https://raw.githubusercontent.com/scse-l/mysql57-windows-server-core/master/msvcr120.dll -OutFile c:\windows\system32\msvcr120.dll;
+
+COPY entrypoint.ps1 entrypoint.ps1
+
+ENTRYPOINT [ "powershell.exe", ".\\entrypoint.ps1"];
